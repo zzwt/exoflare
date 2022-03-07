@@ -1,11 +1,20 @@
-import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
+import React, {
+  useEffect,
+  useState,
+  memo,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
 import axios from 'axios';
-import { Table } from 'antd';
+import { Table, Input, Button, Space } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 
 export default memo(() => {
   const [error, setError] = useState(null);
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const searchInput = useRef();
 
   const sorterGenerator = useCallback((dataIndex) => {
     return (a, b) => {
@@ -35,6 +44,69 @@ export default memo(() => {
     getDrivers();
   }, []);
 
+  const getColumnSearchProps = useCallback(
+    (dataIndex) => ({
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+            ref={(node) => {
+              searchInput.current = node;
+            }}
+            placeholder={`Search ${dataIndex}`}
+            value={selectedKeys[0]}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() => confirm()}
+            style={{ marginBottom: 8, display: 'block' }}
+          />
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              icon={<SearchOutlined />}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Search
+            </Button>
+            <Button
+              onClick={() => {
+                clearFilters();
+                confirm({ closeDropdown: true });
+              }}
+              size="small"
+              style={{ width: 90 }}
+            >
+              Reset
+            </Button>
+          </Space>
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+      onFilter: (value, record) =>
+        record[dataIndex]
+          ? record[dataIndex]
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase())
+          : '',
+      onFilterDropdownVisibleChange: (visible) => {
+        if (visible) {
+          setTimeout(() => searchInput.current.select(), 100);
+        }
+      },
+    }),
+    []
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -42,21 +114,24 @@ export default memo(() => {
         dataIndex: 'name',
         key: 'name',
         sorter: sorterGenerator('name'),
+        ...getColumnSearchProps('name'),
       },
       {
         title: 'Phone',
         dataIndex: 'phone',
         key: 'phone',
         sorter: sorterGenerator('phone'),
+        ...getColumnSearchProps('phone'),
       },
       {
         title: 'Rego',
         dataIndex: 'rego',
         key: 'rego',
         sorter: sorterGenerator('rego'),
+        ...getColumnSearchProps('rego'),
       },
     ],
-    [sorterGenerator]
+    [sorterGenerator, getColumnSearchProps]
   );
 
   if (error) return <div>{error}</div>;
