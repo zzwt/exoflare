@@ -10,7 +10,7 @@ import axios from 'axios';
 import { Table, Input, Button, Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 
-export default memo(() => {
+export default memo(({ selected, onSelect }) => {
   const [error, setError] = useState(null);
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -30,13 +30,14 @@ export default memo(() => {
 
   useEffect(() => {
     const getDrivers = async () => {
+      setError(null);
       setLoading(true);
       try {
         const response = await axios.get('http://localhost:3005/drivers');
         setDrivers(response.data);
       } catch (error) {
         console.log(error);
-        setError('Fetching drivers error');
+        setError(error);
       } finally {
         setLoading(false);
       }
@@ -134,7 +135,24 @@ export default memo(() => {
     [sorterGenerator, getColumnSearchProps]
   );
 
-  if (error) return <div>{error}</div>;
+  const onRowClick = useCallback(
+    (record) => ({
+      onClick: (event) => {
+        onSelect(record);
+      },
+    }),
+    [onSelect]
+  );
+
+  const setRowClassName = useCallback(
+    (record) => {
+      if (selected === null) return '';
+      return record.id === selected.id ? 'row_active' : '';
+    },
+    [selected]
+  );
+
+  if (error) return <div>Failed fetching drivers... Please try later</div>;
 
   return (
     <Table
@@ -144,6 +162,8 @@ export default memo(() => {
       loading={loading}
       pagination={false}
       sortDirections={['ascend', 'descend']}
+      onRow={onRowClick}
+      rowClassName={setRowClassName}
     />
   );
 });

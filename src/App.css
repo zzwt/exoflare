@@ -37,3 +37,22 @@
     transform: rotate(360deg);
   }
 }
+
+.row_active {
+  background-color: lightgrey;
+}
+.ant-table-tbody > .row_active:hover > td {
+  background-color: lightgrey;
+}
+.ant-table-tbody > .row_active:hover > td.ant-table-cell-row-hover {
+  background-color: lightgrey;
+}
+
+.ant-table-tbody > .row_active > td.ant-table-column-sort {
+  background-color: lightgrey;
+}
+
+.answers_container {
+  width: 40%;
+  position: fixed;
+}
