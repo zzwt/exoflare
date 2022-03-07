@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from 'react';
+import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { Table } from 'antd';
 
@@ -6,6 +6,18 @@ export default memo(() => {
   const [error, setError] = useState(null);
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const sorterGenerator = useCallback((dataIndex) => {
+    return (a, b) => {
+      if (a[dataIndex] === null) {
+        return 1;
+      }
+      if (b[dataIndex] === null) {
+        return -1;
+      }
+      return a[dataIndex].localeCompare(b[dataIndex]);
+    };
+  }, []);
 
   useEffect(() => {
     const getDrivers = async () => {
@@ -23,23 +35,29 @@ export default memo(() => {
     getDrivers();
   }, []);
 
-  const columns = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Phone',
-      dataIndex: 'phone',
-      key: 'phone',
-    },
-    {
-      title: 'Rego',
-      dataIndex: 'rego',
-      key: 'rego',
-    },
-  ];
+  const columns = useMemo(
+    () => [
+      {
+        title: 'Name',
+        dataIndex: 'name',
+        key: 'name',
+        sorter: sorterGenerator('name'),
+      },
+      {
+        title: 'Phone',
+        dataIndex: 'phone',
+        key: 'phone',
+        sorter: sorterGenerator('phone'),
+      },
+      {
+        title: 'Rego',
+        dataIndex: 'rego',
+        key: 'rego',
+        sorter: sorterGenerator('rego'),
+      },
+    ],
+    [sorterGenerator]
+  );
 
   if (error) return <div>{error}</div>;
 
