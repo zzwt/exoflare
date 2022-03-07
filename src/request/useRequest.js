@@ -23,10 +23,7 @@ export const useRequest = (endpoint) => {
       }
     };
 
-    if (endpoint) {
-      console.log(endpoint, 'endpoint');
-      load();
-    }
+    if (endpoint) load();
   }, [endpoint]);
 
   return { loading, error, data };
