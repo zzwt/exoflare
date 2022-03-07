@@ -1,7 +1,8 @@
 # How to Run the App
 
-1. npm run server (It will start mocking server)
-2. npm run start
+1. npm install
+2. npm run server (It will start mocking server)
+3. npm run start
 
 ## For improvement
 
