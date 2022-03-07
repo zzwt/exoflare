@@ -1,19 +1,10 @@
-import React, {
-  useEffect,
-  useState,
-  memo,
-  useCallback,
-  useMemo,
-  useRef,
-} from 'react';
-import axios from 'axios';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { Table, Input, Button, Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-
+import { useRequest } from '../request/useRequest';
 export default memo(({ selected, onSelect }) => {
-  const [error, setError] = useState(null);
-  const [drivers, setDrivers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const { error, data: drivers, loading } = useRequest('drivers');
+
   const searchInput = useRef();
 
   const sorterGenerator = useCallback((dataIndex) => {
@@ -26,23 +17,6 @@ export default memo(({ selected, onSelect }) => {
       }
       return a[dataIndex].localeCompare(b[dataIndex]);
     };
-  }, []);
-
-  useEffect(() => {
-    const getDrivers = async () => {
-      setError(null);
-      setLoading(true);
-      try {
-        const response = await axios.get('http://localhost:3005/drivers');
-        setDrivers(response.data);
-      } catch (error) {
-        console.log(error);
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getDrivers();
   }, []);
 
   const getColumnSearchProps = useCallback(

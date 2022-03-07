@@ -1,30 +1,11 @@
-import React, { memo, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React, { memo, useCallback } from 'react';
 import { Row, Col } from 'antd';
+import { useRequest } from '../request/useRequest';
 
 export default memo(({ selected }) => {
-  const [error, setError] = useState(null);
-  const [answers, setAnswers] = useState({});
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const getAnswers = async () => {
-      setError(null);
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `http://localhost:3005/answers/${selected.id}`
-        );
-        setAnswers(response.data);
-      } catch (error) {
-        console.log(error);
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (selected) getAnswers();
-  }, [selected]);
+  const { error, data: answers } = useRequest(
+    selected ? `answers/${selected.id}` : null
+  );
 
   const renderAnswers = useCallback((answers) => {
     let score = 0;
@@ -72,5 +53,7 @@ export default memo(({ selected }) => {
       </div>
     );
 
-  return <div className="answers_container">{renderAnswers(answers)}</div>;
+  return (
+    <div className="answers_container">{answers && renderAnswers(answers)}</div>
+  );
 });
